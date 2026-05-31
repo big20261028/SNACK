@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ezen.reply">
+	<insert id="insert" parameterType="com.ezen.vo.ReplyVO">
+		insert into reply (usernum,no,rnote) 
+		values (#{usernum},#{no},#{rnote})
+	</insert>
+	
+	<select id="isYourRep" parameterType="com.ezen.vo.ReplyVO" resultType="java.lang.Integer">
+		select count(*) from reply 
+		where rno = #{rno} and usernum = #{usernum}
+	</select>
+	
+	<delete id="delete" parameterType="com.ezen.vo.ReplyVO">
+		delete from reply 
+		where rno = #{rno}
+	</delete>
+	
+	<select id="total" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select count(*) from reply
+		where no = #{no}
+	</select>
+	
+	<select id="list" parameterType="com.ezen.vo.SearchVO" 
+		resultType="com.ezen.vo.ReplyVO">
+		select rno, no, usernum, rnote, date(rwdate) as rwdate,
+		(select userid from user where usernum = reply.usernum) as userid
+		from reply
+		where no = #{no} 
+		order by rno desc
+		limit #{offset},10
+	</select>
+	
+	<select id="isAdmin" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select count(*) from user
+		where usernum = #{usernum} and isadmin = 'Y'
+	</select>
+	
+	<select id="userTotal" parameterType="com.ezen.vo.SearchVO" resultType="java.lang.Integer">
+		select count(*) from reply
+		where usernum = #{usernum}
+	</select>
+	<select id="userReplyList" parameterType="com.ezen.vo.SearchVO" resultType="com.ezen.vo.ReplyVO">
+		select rno, no, usernum, rnote, date(rwdate) as rwdate,
+		(select userid from user where usernum = reply.usernum) as userid
+		from reply
+		where usernum = #{usernum}
+		order by rno desc
+		limit #{offset},10
+	</select>
+</mapper>

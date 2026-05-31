@@ -1,0 +1,13 @@
+# 빌드 결과물 및 임시 파일 제외
+target/
+upload/
+img_upload/
+
+# IDE 설정 파일 제외
+.classpath
+.project
+.settings/
+.springBeans
+
+# SVN 파일 제외
+.svn/

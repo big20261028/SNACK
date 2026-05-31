@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ezen.follow">
+	<select id="isFollow" parameterType="com.ezen.vo.FollowVO" resultType="java.lang.Integer">
+		select count(*) from follow
+		where fromnum = #{fromnum} and tonum = #{tonum}
+	</select>
+	
+	<insert id="insert" parameterType="com.ezen.vo.FollowVO">
+		insert into follow (fromnum,tonum)
+		values (#{fromnum},#{tonum})
+	</insert>
+	
+	<delete id="delete" parameterType="com.ezen.vo.FollowVO">
+		delete from follow 
+		where fromnum = #{fromnum} and tonum = #{tonum}
+	</delete>
+	
+	
+	<select id="followTotal" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select count(*) from follow
+		where fromnum = #{usernum}
+	</select>
+
+	<select id="followList" parameterType="com.ezen.vo.SearchVO" resultType="com.ezen.vo.FollowVO">
+		select fno, fromnum, tonum, date(fwdate) as fwdate,
+		(select profileimgp from user where usernum = follow.tonum) as profileimgp,
+		(select profileimgf from user where usernum = follow.tonum) as profileimgf,   
+		(select userid from user where usernum = follow.tonum) as followid,
+		(select intro from user where usernum = follow.tonum) as intro
+		from follow
+		where fromnum = #{usernum}
+		limit #{offset},10
+	</select>
+	
+	<select id="followerTotal" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select count(*) from follow
+		where tonum = #{usernum}
+	</select>
+	
+	<select id="followerList" parameterType="com.ezen.vo.SearchVO" resultType="com.ezen.vo.FollowVO">
+		select fno, fromnum, tonum, date(fwdate) as fwdate,
+		(select profileimgp from user where usernum = follow.fromnum) as profileimgp,
+		(select profileimgf from user where usernum = follow.fromnum) as profileimgf,   
+		(select userid from user where usernum = follow.fromnum) as userid,
+		(select intro from user where usernum = follow.fromnum) as intro
+		from follow 
+		where tonum = #{usernum}
+		limit #{offset},10
+	</select>
+
+</mapper>

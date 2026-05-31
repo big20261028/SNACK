@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ezen.board">
+	<insert id="insert" parameterType="com.ezen.vo.BoardVO" useGeneratedKeys="true" keyProperty="no">
+		insert into board (usernum,title,note,pname,fname) 
+		values (#{usernum},#{title},#{note},
+		<if test='fname != null  and !fname.equals("")'> 
+			#{pname}, #{fname}
+		</if>
+		<if test='fname == null or fname.equals("")'> 
+			null, null
+		</if>		
+		)
+	</insert>
+	
+	<select id="total" parameterType="com.ezen.vo.SearchVO" resultType="java.lang.Integer">
+		select count(*) from board 
+		<if test='keyword != null  and !keyword.equals("")'>
+			<if test="searchFilter == 1">
+				where title like '%${keyword}%'
+			</if>
+			<if test="searchFilter == 2">
+				where usernum in (select usernum from user where userid like '%${keyword}%') 
+			</if>
+			<if test="searchFilter == 3">
+				where note like '%${keyword}%'
+			</if>
+			<if test="searchFilter == 4">
+				where no in (select no from reply where rnote like '%${keyword}%')
+			</if>
+		</if>						
+	</select>	
+
+	<select id="list" parameterType="com.ezen.vo.SearchVO" resultType="com.ezen.vo.BoardVO">
+		select no,usernum,title,date(wdate) as wdate,hit,
+		(select userid from user where usernum = board.usernum) as userid,
+		(select count(*) from recommend where no = board.no) as recCount,
+		(select count(*) from reply where no = board.no) as repCount
+		from board
+		<if test='keyword != null  and !keyword.equals("")'>
+			<if test="searchFilter == 1">
+				where title like '%${keyword}%'
+			</if>
+			<if test="searchFilter == 2">
+				where usernum in (select usernum from user where userid like '%${keyword}%') 
+			</if>
+			<if test="searchFilter == 3">
+				where note like '%${keyword}%'
+			</if>
+			<if test="searchFilter == 4">
+				where no in (select no from reply where rnote like '%${keyword}%')
+			</if>
+		</if>		
+		order by ${ orderkey }
+		limit #{offset},10
+	</select>
+	
+	<update id="hit" parameterType="com.ezen.vo.BoardVO">
+		update board set hit = hit + 1
+		where no = #{no}
+	</update>	
+	
+	<select id="view" parameterType="java.lang.Integer" resultType="com.ezen.vo.BoardVO">
+		select no, usernum, title, note, pname, fname, date(wdate) as wdate, hit,
+		(select userid from user where usernum = board.usernum) as userid,
+		(select count(*) from recommend where no = board.no) as recCount,
+		(select intro from user where usernum = board.usernum) as intro,
+		(select profileimgp from user where usernum = board.usernum) as profileimgp,
+		(select profileimgf from user where usernum = board.usernum) as profileimgf,
+		(select count(*) from follow where fromnum = board.usernum) as followCnt,
+		(select count(*) from follow where tonum = board.usernum) as followerCnt
+		from board 
+		where no = #{no}
+	</select>
+	
+	<update id="update" parameterType="com.ezen.vo.BoardVO">
+		update board 
+		set title = #{title},
+		<if test='fname != null and !fname.equals("")'>
+			note = #{note},
+			pname = #{pname},
+			fname = #{fname} 
+		</if>
+		<if test='fname == null or fname.equals("")'>
+			note = #{note} 
+		</if>
+		where no = #{no}
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from board where no = #{no}
+	</delete>
+
+	<select id="followTotal" parameterType="com.ezen.vo.SearchVO" resultType="java.lang.Integer">
+		select count(*) from board 
+		where usernum in (select tonum from follow where fromnum = ${usernum})
+		<if test='keyword != null  and !keyword.equals("")'>
+			<if test="searchFilter == 1">
+				and title like '%${keyword}%'
+			</if>
+			<if test="searchFilter == 2">
+				and usernum in (select usernum from user where userid like '%${keyword}%') 
+			</if>
+			<if test="searchFilter == 3">
+				and note like '%${keyword}%'
+			</if>
+			<if test="searchFilter == 4">
+				and no in (select no from reply where rnote like '%${keyword}%')
+			</if>
+		</if>	
+	</select>
+
+	<select id="followList" parameterType="com.ezen.vo.SearchVO" resultType="com.ezen.vo.BoardVO">
+		select no,usernum,title,date(wdate) as wdate,hit,
+		(select userid from user where usernum = board.usernum) as userid,
+		(select count(*) from recommend where no = board.no) as recCount,
+		(select count(*) from reply where no = board.no) as repCount
+		from board
+		where usernum in (select tonum from follow where fromnum = ${usernum})
+		<if test='keyword != null  and !keyword.equals("")'>
+			<if test="searchFilter == 1">
+				and title like '%${keyword}%'
+			</if>
+			<if test="searchFilter == 2">
+				and usernum in (select usernum from user where userid like '%${keyword}%') 
+			</if>
+			<if test="searchFilter == 3">
+				and note like '%${keyword}%'
+			</if>
+			<if test="searchFilter == 4">
+				and no in (select no from reply where rnote like '%${keyword}%')
+			</if>
+		</if>
+		order by ${ orderkey }
+		limit #{offset},10
+	</select>
+
+</mapper>
